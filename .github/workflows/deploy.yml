@@ -1,0 +1,13 @@
+name: Say deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo the message
+        run: echo "Deploying the application...
