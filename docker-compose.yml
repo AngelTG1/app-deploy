@@ -1,0 +1,42 @@
+services:
+  apidb:
+    container_name: apidb
+    image: mysql:9.3.0
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - "${DB_PORT_EXT:-3307}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-root}
+      - MYSQL_USER=${DB_USER:-Angel}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-Angel30.%}
+      - MYSQL_DATABASE=${DB_DATABASE:-deploy}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  app-deploy:
+    container_name: app-deploy
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      - PORT=${PORT:-3001}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3001}
+      - DB_HOST=${DB_HOST:-apidb}
+      - DB_USER=${DB_USER:-Angel}
+      - DB_PASSWORD=${DB_PASSWORD:-Angel30.%}
+      - DB_DATABASE=${DB_DATABASE:-deploy}
+      - DB_PORT=${DB_PORT:-3306}
+      - JWT_SECRET=${JWT_SECRET:-jwt_secret}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - NODE_ENV=${NODE_ENV:-development}
+    depends_on:
+      - apidb
